@@ -5,7 +5,9 @@ using UnityEngine;
 public class SandManager : MonoBehaviour
 {
     [Header("Settings")]
-    public int touchSize = 1;       // Bán kính vùng ảnh hưởng (cọ vẽ/tẩy)
+    public int touchSize = 3;       // Bán kính vùng ảnh hưởng (cọ vẽ/tẩy)
+
+    public int maxYDifferenceColorHeight = 2;
     
     [Header("References")]
     public GridManager gridManager; // Kéo GridManager vào đây
@@ -90,14 +92,18 @@ public class SandManager : MonoBehaviour
             {
                 if (!(i >= 0 && i < gridManager.columns && j >= 0 && j < gridManager.rows))
                     Debug.Log("Debug: " + i + "-" + j + " / " + gridManager.columns + " - " + gridManager.rows + " / " + endI + "-" + endJ);
-                if(gridManager.grid[i, j] != color)
+                if (gridManager.grid[i, j] != color)
+                {
+                    if(j > maxSandsCanCollect)
+                        break;
                     continue;
+                }
                 if (i >= 0 && i < gridManager.columns && j >= 0 && j < gridManager.rows)
                 {
                     if (gridManager.grid[i, j] != targetValue)
                     {
-                        /*if(bucket != null)
-                            SpawnFlyParticle(gridManager.GetPointPosition(i, j), gridManager.colors[i, j], bucket).Forget();//tmp*/
+                        if(bucket != null && (i + j) % 10 == 0)
+                            SpawnFlyParticle(gridManager.GetPointPosition(i, j), gridManager.colors[i, j], bucket).Forget();//tmp
                         gridManager.grid[i, j] = targetValue;
                         gridManager.colors[i, j] = gridManager.backgroundColor;
                         gridManager.OnDeleteSand();

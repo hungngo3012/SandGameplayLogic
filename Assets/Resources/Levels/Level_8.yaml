@@ -10,19 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2e0d2a2fa7b10c5b5f1cfcc0c1616f1e, type: 3}
-  m_Name: Level 8
-  m_EditorClassIdentifier:
+  m_Name: Level_8
+  m_EditorClassIdentifier: 
   levelDifficulty: 0
   tutorialType: 0
-  tutorialText:
+  tutorialText: 
   suctionRowCount: 0
   checkRowCount: 0
   isActiveLogicDifficulty: 0
   active_Difficult_Logic_Ver_2_Only_Stack: 0
   minLoseStreakToActive: 1
   commonData:
-    name:
-    description:
+    name: 
+    description: 
     icon: {fileID: 0}
   clothData: []
   treadMillData: []
@@ -54,7 +54,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 1
     value: 1
     isLock: 1
@@ -62,7 +62,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 1
     value: 0
     isLock: 0
@@ -70,7 +70,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 1
     value: 2
     isLock: 1
@@ -78,7 +78,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 1
     value: 0
     isLock: 0
@@ -86,7 +86,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 1
     value: 1
     isLock: 1
@@ -94,7 +94,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 1
     value: 0
     isLock: 0
@@ -102,7 +102,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 1
     value: 3
     isLock: 1
@@ -110,7 +110,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 1
     value: 0
     isLock: 0
@@ -118,7 +118,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 1
     value: 2
     isLock: 1
@@ -126,7 +126,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 2
     value: 3
     isLock: 0
@@ -134,7 +134,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 2
     value: 3
     isLock: 0
@@ -142,7 +142,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 1
     value: 0
     isLock: 0
@@ -150,7 +150,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 2
     value: 3
     isLock: 0
@@ -158,7 +158,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 2
     value: 3
     isLock: 0
@@ -166,7 +166,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 2
     value: 3
     isLock: 0
@@ -174,7 +174,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 1
     value: 0
     isLock: 0
@@ -182,7 +182,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 1
     value: 2
     isLock: 1
@@ -190,7 +190,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 1
     value: 0
     isLock: 0
@@ -198,7 +198,7 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 
   - type: 2
     value: 3
     isLock: 0
@@ -206,4 +206,4 @@ MonoBehaviour:
     isDouble: 0
     isSwitch: 0
     direction: 1
-    note:
+    note: 

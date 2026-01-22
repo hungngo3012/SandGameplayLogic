@@ -1,14 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LevelLoader : MonoBehaviour
 {
     [Header("Input")]
-    public string relativeLevelPath = "Levels/Level 1.asset";
+    string relativeLevelPath = "Levels/Level_";
     
     [Header("Output")]
     public SpriteRenderer targetRenderer;
@@ -19,8 +21,12 @@ public class LevelLoader : MonoBehaviour
     
     public GridManager gridManager;
 
+    private int playerLevel = 1;
+    private int maxLevel = 10;
+
     void Start()
     {
+        playerLevel = PlayerPrefs.GetInt("PlayerLevel", 1);
         LoadAndRender();
     }
 
@@ -63,7 +69,7 @@ public class LevelLoader : MonoBehaviour
     {
         // 1. relativeLevelPath lúc này không được có đuôi file (ví dụ: "Levels/Level1" thay vì "Levels/Level1.yaml")
         // Nếu relativeLevelPath của bạn đang có đuôi file, hãy dùng Path.GetFileNameWithoutExtension
-        string resourcePath = relativeLevelPath; 
+        string resourcePath = relativeLevelPath +  playerLevel.ToString(); 
 
         // 2. Load file dưới dạng TextAsset
         TextAsset levelAsset = Resources.Load<TextAsset>(resourcePath);
@@ -145,10 +151,12 @@ public class LevelLoader : MonoBehaviour
 
         // chunks: binary string between "chunks:" and "chunkSize:"
         // non-greedy để không nuốt quá
-        var chunksMatch = Regex.Match(yaml, @"chunks:\s*([\s\S]*?)\s*chunkSize:", RegexOptions.Singleline);
+        //var chunksMatch = Regex.Match(yaml, @"chunks:\s*([\s\S]*?)\s*chunkSize:", RegexOptions.Singleline);
+        var chunksMatch = Regex.Match(yaml, @"chunks:\s*([0-9a-fA-F]+)");
         if (chunksMatch.Success)
         {
-            level.chunksBits = CleanBinaryString(chunksMatch.Groups[1].Value);
+            //level.chunksBits = CleanBinaryString(chunksMatch.Groups[1].Value);
+            level.chunksBits = chunksMatch.Groups[1].Value;
         }
         else
         {
@@ -186,7 +194,6 @@ public class LevelLoader : MonoBehaviour
             level.name = nameMatch.Groups[1].Value.Trim();
         }
 
-        Debug.Log($"Pink parsed = {level.palette[0]}");
         return level;
     }
 
@@ -273,74 +280,10 @@ public class LevelLoader : MonoBehaviour
 
             int chunkStart = cursor;
 
-            // CASE A: 16 bits / chunk (1 bit / pixel cho 4x4)
-            /*if (bitsPerChunk == pixelsPerChunk)
-            {
-                for (int i = 0; i < pixelsPerChunk; i++)
-                {
-                    int localX = i % level.chunkSize;
-                    int localY = i / level.chunkSize;
-
-                    int px = chunkX * level.chunkSize + localX;
-                    int py = chunkY * level.chunkSize + localY;
-
-                    // Nếu bị lật dọc, bật dòng này:
-                    // py = (height - 1) - py;
-
-                    char b = level.chunksBits[cursor++];
-                    if (b == '1') pixels[py * width + px] = c0;
-                }
-            }
-            // CASE B: 32 bits / chunk (16 data + 16 padding)
-            else if (bitsPerChunk == 32 && pixelsPerChunk == 16)
-            {
-                // đọc 16 bit đầu là pixel
-                for (int i = 0; i < pixelsPerChunk; i++)
-                {
-                    int localX = i % level.chunkSize;
-                    int localY = i / level.chunkSize;
-
-                    int px = chunkX * level.chunkSize + localX;
-                    int py = chunkY * level.chunkSize + localY;
-
-                    // Nếu bị lật dọc, bật dòng này:
-                    // py = (height - 1) - py;
-
-                    char b = level.chunksBits[cursor++];
-                    if (b == '1') pixels[py * width + px] = c0;
-                }
-
-                // skip padding 16 bit
-                cursor = chunkStart + 32;
-            }
-            // CASE C: 64 bits / chunk
-            // - thử 2bit/pixel (16*2=32) + padding 32
-            // - nếu game bạn thực ra là 4bit/pixel (16*4=64) thì cần sửa decode (bảo mình)
-            else if (bitsPerChunk == 64 && pixelsPerChunk == 16)
-            {
-                for (int i = 0; i < pixelsPerChunk; i++)
-                {
-                    int localX = i % level.chunkSize;
-                    int localY = i / level.chunkSize;
-
-                    int px = chunkX * level.chunkSize + localX;
-                    int py = chunkY * level.chunkSize + localY;
-
-                    // Nếu bị lật dọc, bật dòng này:
-                    // py = (height - 1) - py;
-
-                    int v = ReadBits(level.chunksBits, ref cursor, 2); // 0..3
-                    if (v == 1) pixels[py * width + px] = c0;
-                    else if (v == 2) pixels[py * width + px] = c1;
-                }
-
-                // skip padding 32 bit
-                cursor = chunkStart + 64;
-            }
-            else */if (bitsPerChunk == 8)
+            if (bitsPerChunk == 8)
             {
                 // 1 byte / chunk: coi như "chunk color id"
-                int chunkValue = ReadBits(level.chunksBits, ref cursor, 8); // 0..255
+                int chunkValue = ReadValue(level.chunksBits, ref cursor, 8);
                 Color32 fill;
                 if (chunkValue == 0)
                 {
@@ -348,12 +291,12 @@ public class LevelLoader : MonoBehaviour
                 }
                 else
                 {
-                    int palIndex = chunkValue - 1;
-
-                    if (level.palette.Count > 0)
-                        palIndex = ((palIndex % level.palette.Count) + level.palette.Count) % level.palette.Count;
-
-                    fill = level.palette.Count > 0 ? level.palette[palIndex] : new Color32(255, 255, 255, 255);
+                    //int palIndex = chunkValue - 1;
+                    int palIndex = chunkValue;
+                    /*if (level.palette.Count > 0)
+                        palIndex = ((palIndex % level.palette.Count) + level.palette.Count) % level.palette.Count;*/
+                    
+                    fill = level.palette[palIndex];
                 }
 
                 // Fill nguyên chunk 4x4
@@ -384,13 +327,55 @@ public class LevelLoader : MonoBehaviour
         return tex;
     }
 
-    static int ReadBits(string bits, ref int cursor, int count)
+    /*static int ReadBits(string bits, ref int cursor, int count)
     {
         int v = 0;
         for (int i = 0; i < count; i++)
             v = (v << 1) | (bits[cursor++] == '1' ? 1 : 0);
         return v;
-    }
+    }*/
+    static int ReadValue(string data, ref int cursor, int count = 8)
+    {
+        int start = -1;
+        int end = -1;
 
+        // Duyệt qua cụm 8 ký tự để tìm phạm vi của số thực sự (bỏ qua 0 đầu và 0 cuối)
+        for (int i = 0; i < count; i++)
+        {
+            int currentIndex = cursor + i;
+            if (data[currentIndex] != '0')
+            {
+                if (start == -1) start = currentIndex; // Ghi lại vị trí số khác 0 đầu tiên
+                end = currentIndex; // Cập nhật vị trí số khác 0 cuối cùng liên tục
+            }
+        }
+
+        int value = 0;
+
+        // Nếu không tìm thấy số nào khác 0 (toàn bộ là '0')
+        if (start == -1)
+        {
+            value = 0;
+        }
+        else
+        {
+            // Chuyển đoạn từ start đến end thành số nguyên
+            for (int i = start; i <= end; i++)
+            {
+                value = (value * 10) + (data[i] - '0');
+            }
+        }
+
+        // Luôn luôn di chuyển con trỏ đi đủ 8 bước để sang cụm tiếp theo
+        cursor += count;
+
+        return value;
+    }
+    public void OnNextLevel()
+    {
+        playerLevel = (playerLevel % maxLevel) + 1;
+        PlayerPrefs.SetInt("PlayerLevel", playerLevel);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
     #endregion
 }
