@@ -96,8 +96,8 @@ public class SandManager : MonoBehaviour
                 {
                     if (gridManager.grid[i, j] != targetValue)
                     {
-                        if(bucket != null)
-                            SpawnFlyParticle(gridManager.GetPointPosition(i, j), gridManager.colors[i, j], bucket).Forget();//tmp
+                        /*if(bucket != null)
+                            SpawnFlyParticle(gridManager.GetPointPosition(i, j), gridManager.colors[i, j], bucket).Forget();//tmp*/
                         gridManager.grid[i, j] = targetValue;
                         gridManager.colors[i, j] = gridManager.backgroundColor;
                         gridManager.OnDeleteSand();

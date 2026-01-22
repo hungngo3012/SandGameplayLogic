@@ -150,12 +150,24 @@ public class GridManager : MonoBehaviour
     }
 
     //bool needUpdateTexture = false;
+    private uint _sandSeed = 12345;
     void UpdateSandLogic()
     {
+        _sandSeed += (uint)Time.frameCount;
         //Tính toán vị trí mới
         for (int y = 1; y < rows; y++)
         {
-            bool leftToRight = Random.value > 0.5f;
+            //bool leftToRight = Random.value > 0.5f;
+            //bool leftToRight = (y  % 2 == 0) ? true : false;
+            
+            // 1. Dùng Xorshift để lấy một số ngẫu nhiên cho hàng này
+            _sandSeed ^= _sandSeed << 13;
+            _sandSeed ^= _sandSeed >> 17;
+            _sandSeed ^= _sandSeed << 5;
+            // 2. Quyết định hướng quét X (Trái -> Phải hoặc ngược lại)
+            // Dùng bit cuối cùng của seed để quyết định
+            bool leftToRight = (_sandSeed & 1) == 1;
+            
             for (int i = 0; i < columns; i++)
             {
                 int x = leftToRight ? i : (columns - 1 - i);

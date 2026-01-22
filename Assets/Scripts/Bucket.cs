@@ -51,7 +51,7 @@ public class Bucket : MonoBehaviour
         float worldX = transform.position.x;
 
         // 2. Quy về tọa độ tương đối so với góc dưới-trái của grid
-        float relativeX = worldX - GridManager.gridStartPosition.x;
+        float relativeX = worldX - GridManager.gridStartPosition.x - 1.0f;
 
         // 3. Đổi sang index ô lưới
         int centerX = Mathf.FloorToInt(relativeX / GridManager.spriteSize);
