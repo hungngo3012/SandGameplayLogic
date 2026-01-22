@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class SandManager : MonoBehaviour
@@ -71,7 +73,7 @@ public class SandManager : MonoBehaviour
         }
     }
 
-    internal int ApplyAction(int centerX, int centerY, int color, int maxSandsCanCollect, Transform bucket = null)
+    internal void ApplyAction(int centerX, int centerY, int color, int maxSandsCanCollect, Bucket bucket = null)
     {
         int countSandDeleted = 0;
         int targetValue = 0;
@@ -86,6 +88,7 @@ public class SandManager : MonoBehaviour
         if(endI >= gridManager.columns)
             endI = gridManager.columns - 1;
         
+        List<Vector2> checkList = new List<Vector2>();
         for (int i = startI; i <= endI; i++)
         {
             for (int j = centerY ; j <= endJ; j++)
@@ -103,20 +106,28 @@ public class SandManager : MonoBehaviour
                     if (gridManager.grid[i, j] != targetValue)
                     {
                         if(bucket != null && (i + j) % 10 == 0)
-                            SpawnFlyParticle(gridManager.GetPointPosition(i, j), gridManager.colors[i, j], bucket).Forget();//tmp
+                            SpawnFlyParticle(gridManager.GetPointPosition(i, j), gridManager.colors[i, j], bucket.transform).Forget();//tmp
                         gridManager.grid[i, j] = targetValue;
-                        gridManager.colors[i, j] = gridManager.backgroundColor;
-                        gridManager.OnDeleteSand();
+                        //gridManager.colors[i, j] = gridManager.backgroundColor;
+                        if(j + 1 >= gridManager.rows || (gridManager.colors[i, j + 1].Equals(gridManager.backgroundColor)))
+                            gridManager.colors[i, j] = gridManager.backgroundColor;
+                        else
+                            checkList.Add(new Vector2(i, j));
+                        //gridManager.OnDeleteSand();
                         gridManager.pressing = true;
                         countSandDeleted++;
                         if (countSandDeleted == maxSandsCanCollect)
-                            return countSandDeleted;
+                        {
+                            if (bucket != null) bucket.collected = countSandDeleted;
+                            return;
+                        }
                     }
                 }
             }
         }
         
-        return countSandDeleted;
+        WaitToClearSand(checkList).Forget();
+        if (bucket != null) bucket.collected = countSandDeleted;
     }
     public SandPoint sandParticlePrefab;
     async UniTask SpawnFlyParticle(Vector3 startPos, Color color, Transform target)//tmp
@@ -137,6 +148,15 @@ public class SandManager : MonoBehaviour
         await p.transform.DOLocalMove(Vector3.zero, duration).AsyncWaitForCompletion();
 
         Destroy(p);
+    }
+    async UniTask WaitToClearSand(List<Vector2> checkList)
+    {
+        foreach (var val in checkList)
+        {
+            await UniTask.Yield();
+            if(gridManager.grid[(int)val.x, (int)val.y] == 0)
+                gridManager.colors[(int)val.x, (int)val.y] = gridManager.backgroundColor;
+        }
     }
 
     [ContextMenu("Clear All Sands")]

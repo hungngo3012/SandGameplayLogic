@@ -1180,10 +1180,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   buckets:
   - {fileID: 1913198314}
-  - {fileID: 389116365}
-  - {fileID: 819736372}
-  - {fileID: 1040291472}
-  - {fileID: 2613083}
   displayRenderer: {fileID: 1958931267}
   spriteSize: 0.1
   gridStartPosition: {x: 0, y: 0, z: 0}

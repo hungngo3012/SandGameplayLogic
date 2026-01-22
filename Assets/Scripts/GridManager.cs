@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
+using Random = UnityEngine.Random;
 
 public class GridManager : MonoBehaviour
 {
@@ -13,7 +15,7 @@ public class GridManager : MonoBehaviour
 
     [HideInInspector] public int[,] grid;
     [HideInInspector] public Color[,] colors;
-    public Dictionary<Color32, ColorCount> colorConfigs = new Dictionary<Color32, ColorCount>();//tmp
+    public Dictionary<Color32, ColorCount> colorConfigs = new Dictionary<Color32, ColorCount>(); //tmp
     private Color[] flatColorArray;
     internal Texture2D sandTexture;
 
@@ -47,16 +49,16 @@ public class GridManager : MonoBehaviour
         Rect r = displayRenderer.sprite.textureRect;
         int texX0 = Mathf.RoundToInt(r.x);
         int texY0 = Mathf.RoundToInt(r.y);
-        int texW  = Mathf.RoundToInt(r.width);
-        int texH  = Mathf.RoundToInt(r.height);
-        
+        int texW = Mathf.RoundToInt(r.width);
+        int texH = Mathf.RoundToInt(r.height);
+
         columns = texW;
         rows = texH;
-        
+
         grid = new int[columns, rows];
         colors = new Color[columns, rows];
         flatColorArray = new Color[columns * rows];
-        
+
         for (int y = 0; y < rows; y++)
         {
             for (int x = 0; x < columns; x++)
@@ -84,6 +86,7 @@ public class GridManager : MonoBehaviour
                 }
             }
         }
+
         InitBuckets();
     }
 
@@ -99,6 +102,7 @@ public class GridManager : MonoBehaviour
                 list = new List<Bucket>();
                 bucketsPerColor.Add(bucket.color, list);
             }
+
             list.Add(bucket);
         }
 
@@ -136,21 +140,33 @@ public class GridManager : MonoBehaviour
         {
             results.Add(val.Value.amount);
         }
-        
+
         return results;
     }
+
     // HÀM QUAN TRỌNG: Để SandManager gọi khi xóa
     public void UpdatePixelTexture(int x, int y, Color color)
     {
         sandTexture.SetPixel(x, y, color);
     }
+
     internal void OnDeleteSand()
     {
         UpdateSandLogic();
     }
 
+    internal int numBucketsCollectingSand = 0;
+    private void FixedUpdate()
+    {
+        if (numBucketsCollectingSand <= 0)
+            return;
+
+        UpdateSandLogic();
+    }
+
     //bool needUpdateTexture = false;
     private uint _sandSeed = 12345;
+
     void UpdateSandLogic()
     {
         _sandSeed += (uint)Time.frameCount;
@@ -160,7 +176,7 @@ public class GridManager : MonoBehaviour
         {
             //bool leftToRight = Random.value > 0.5f;
             //bool leftToRight = (y  % 2 == 0) ? true : false;
-            
+
             // 1. Dùng Xorshift để lấy một số ngẫu nhiên cho hàng này
             _sandSeed ^= _sandSeed << 13;
             _sandSeed ^= _sandSeed >> 17;
@@ -168,7 +184,7 @@ public class GridManager : MonoBehaviour
             // 2. Quyết định hướng quét X (Trái -> Phải hoặc ngược lại)
             // Dùng bit cuối cùng của seed để quyết định
             leftToRight = (_sandSeed & 1) == 1;
-            
+
             for (int i = 0; i < columns; i++)
             {
                 int x = leftToRight ? i : (columns - 1 - i);
@@ -196,48 +212,82 @@ public class GridManager : MonoBehaviour
                 }
             }
         }
-        
+
         //update texture
         //needUpdateTexture = true;
-        if (!handlingSandTexture)
-            HandleSandTexture().Forget();
+        /*if (!handlingSandTexture)
+            HandleSandTexture().Forget();*/
+        UpdateSandTexture();
+    }
+
+    async UniTask WaitAndCheckClear(int x, int y)
+    {
+        await UniTask.DelayFrame(3);
+        if (!colors[x, y].Equals(backgroundColor))
+        {
+            colors[x, y] = backgroundColor;
+        }
     }
 
     internal bool pressing = false;
     private bool handlingSandTexture = false;
+
     [ContextMenu("HandleSandTexture")]
     internal async UniTask HandleSandTexture()
     {
         handlingSandTexture = true;
-        while (pressing)
+        while (numBucketsCollectingSand > 0)
         {
             UpdateSandTexture();
-            await UniTask.Delay(33); // Tương đương ~30 FPS cho riêng phần hình ảnh
+            await UniTask.Delay(33);
         }
+
+        UpdateSandTexture();
         handlingSandTexture = false;
     }
+
     internal void UpdateSandTexture()
     {
         // Chuyển dữ liệu từ mảng 2D sang mảng phẳng 1D
-        for (int y = 0; y < rows; y++) {
-            for (int x = 0; x < columns; x++) {
+        for (int y = 0; y < rows; y++)
+        {
+            for (int x = 0; x < columns; x++)
+            {
                 flatColorArray[y * columns + x] = colors[x, y];
             }
         }
-        
+
         // Cập nhật một lần duy nhất
         sandTexture.SetPixels(flatColorArray);
-        sandTexture.Apply(); 
+        sandTexture.Apply();
+
+        //CheckClearSand();
     }
+
     public void OnClickActiveSprite()
     {
         bool active = !displayRenderer.gameObject.activeSelf;
         displayRenderer.gameObject.SetActive(active);
     }
+
+    [ContextMenu("CheckClearSand")]
+    void CheckClearSand()
+    {
+        for (int y = 0; y < rows; y++)
+        {
+            for (int x = 0; x < columns; x++)
+            {
+                if (grid[x, y] == 0 && !colors[x, y].Equals(backgroundColor))
+                    colors[x, y] = backgroundColor;
+            }
+        }
+    }
+
     public class ColorCount
     {
         public int colorId;
         public int amount;
+
         public ColorCount(int id, int num)
         {
             colorId = id;
@@ -249,6 +299,7 @@ public class GridManager : MonoBehaviour
             this.amount += amount;
         }
     }
+
     internal Vector3 GetPointPosition(int x, int y)
     {
         float worldX = gridStartPosition.x + (x * spriteSize) + (spriteSize * 0.5f);

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
@@ -173,10 +174,10 @@ public class LevelLoader : MonoBehaviour
         foreach (Match m in colorMatches)
         {
             Color32 color = new Color32(
-                (byte)Mathf.RoundToInt(float.Parse(m.Groups[1].Value) * 255f),
-                (byte)Mathf.RoundToInt(float.Parse(m.Groups[2].Value) * 255f),
-                (byte)Mathf.RoundToInt(float.Parse(m.Groups[3].Value) * 255f),
-                (byte)Mathf.RoundToInt(float.Parse(m.Groups[4].Value) * 255f)
+                (byte)(float.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture) * 255.0f),
+                (byte)(float.Parse(m.Groups[2].Value, CultureInfo.InvariantCulture) * 255.0f),
+                (byte)(float.Parse(m.Groups[3].Value, CultureInfo.InvariantCulture) * 255.0f),
+                (byte)(float.Parse(m.Groups[4].Value, CultureInfo.InvariantCulture) * 255.0f)
             );
 
             int valueId = int.Parse(m.Groups[5].Value);

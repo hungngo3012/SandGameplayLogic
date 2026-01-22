@@ -36,13 +36,29 @@ public class Bucket : MonoBehaviour
         }
     }
     
+    bool collectingSands = false;
+    internal int collected = 0;
     [ContextMenu("CollectSand")]
     public void CollectSand()
     {
         int centerX = GetCenterXFromBucket();
-        if(centerX < 0 || centerX >= GridManager.columns - 1)
-            return;
-        int collected = SandManager.ApplyAction(centerX, 0, color, capacity - collectedSands, transform);
+        if (centerX < 0 || centerX >= GridManager.columns - 1)
+        {
+            if (collectingSands)
+                GridManager.numBucketsCollectingSand--;
+            if(GridManager.numBucketsCollectingSand < 0)
+                GridManager.numBucketsCollectingSand = 0;
+            collectingSands = false;
+            return;   
+        }
+
+        if (!collectingSands)
+        {
+            collectingSands = true;
+            GridManager.numBucketsCollectingSand++;
+        }
+        
+        SandManager.ApplyAction(centerX, 0, color, capacity - collectedSands, this);
         collectedSands += collected;
     }
     int GetCenterXFromBucket()
