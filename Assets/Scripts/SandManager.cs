@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using UnityEngine;
 
 public class SandManager : MonoBehaviour
@@ -68,7 +69,7 @@ public class SandManager : MonoBehaviour
         }
     }
 
-    internal int ApplyAction(int centerX, int centerY, int color, int maxSandsCanCollect)
+    internal int ApplyAction(int centerX, int centerY, int color, int maxSandsCanCollect, Transform bucket = null)
     {
         int countSandDeleted = 0;
         int targetValue = 0;
@@ -95,6 +96,8 @@ public class SandManager : MonoBehaviour
                 {
                     if (gridManager.grid[i, j] != targetValue)
                     {
+                        if(bucket != null)
+                            SpawnFlyParticle(gridManager.GetPointPosition(i, j), gridManager.colors[i, j], bucket).Forget();//tmp
                         gridManager.grid[i, j] = targetValue;
                         gridManager.colors[i, j] = gridManager.backgroundColor;
                         gridManager.OnDeleteSand();
@@ -108,6 +111,26 @@ public class SandManager : MonoBehaviour
         }
         
         return countSandDeleted;
+    }
+    public SandPoint sandParticlePrefab;
+    async UniTask SpawnFlyParticle(Vector3 startPos, Color color, Transform target)//tmp
+    {
+        if (sandParticlePrefab == null) return;
+
+        // Tạo hạt cát
+        SandPoint p = Instantiate(sandParticlePrefab, startPos, Quaternion.identity);
+        p.transform.SetParent(target);
+        p.SetColor(color);
+    
+        // Đổi màu hạt cát cho giống màu vừa xóa (nếu bạn có bảng màu)
+        // p.GetComponent<SpriteRenderer>().color = ...; 
+
+        float duration = 0.5f; // Thời gian bay (giây)
+        float elapsed = 0f;
+
+        await p.transform.DOLocalMove(Vector3.zero, duration).AsyncWaitForCompletion();
+
+        Destroy(p);
     }
 
     [ContextMenu("Clear All Sands")]

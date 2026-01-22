@@ -42,7 +42,7 @@ public class Bucket : MonoBehaviour
         int centerX = GetCenterXFromBucket();
         if(centerX < 0 || centerX >= GridManager.columns - 1)
             return;
-        int collected = SandManager.ApplyAction(centerX, 0, color, capacity - collectedSands);
+        int collected = SandManager.ApplyAction(centerX, 0, color, capacity - collectedSands, transform);
         collectedSands += collected;
     }
     int GetCenterXFromBucket()
@@ -57,7 +57,7 @@ public class Bucket : MonoBehaviour
         int centerX = Mathf.FloorToInt(relativeX / GridManager.spriteSize);
 
         // 4. Clamp để tránh out of range
-        centerX = Mathf.Clamp(centerX, 0, GridManager.columns - 1);
+        /*centerX = Mathf.Clamp(centerX, 0, GridManager.columns - 1);*/
 
         return centerX;
     }

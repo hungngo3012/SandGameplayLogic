@@ -236,17 +236,11 @@ public class GridManager : MonoBehaviour
             this.amount += amount;
         }
     }
-    /*static Color32 Quantize(Color c, int step = 128)
+    internal Vector3 GetPointPosition(int x, int y)
     {
-        Color32 cc = (Color32)c;
+        float worldX = gridStartPosition.x + (x * spriteSize) + (spriteSize * 0.5f);
+        float worldY = gridStartPosition.y + (y * spriteSize) + (spriteSize * 0.5f);
 
-        byte Q(byte v)
-        {
-            int q = (v / step) * step;
-            if (q > 255) q = 255;
-            return (byte)q;
-        }
-
-        return new Color32(Q(cc.r), Q(cc.g), Q(cc.b), 255);
-    }*/
+        return new Vector3(worldX, worldY, gridStartPosition.z);
+    }
 }
