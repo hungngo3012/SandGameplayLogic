@@ -156,7 +156,7 @@ public class GridManager : MonoBehaviour
     }
 
     internal int numBucketsCollectingSand = 0;
-    private void FixedUpdate()
+    private void Update()
     {
         if (numBucketsCollectingSand <= 0)
             return;
