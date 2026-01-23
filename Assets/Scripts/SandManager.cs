@@ -105,15 +105,15 @@ public class SandManager : MonoBehaviour
                 {
                     if (gridManager.grid[i, j] != targetValue)
                     {
-                        if(bucket != null && (i + j) % 10 == 0)
-                            SpawnFlyParticle(gridManager.GetPointPosition(i, j), gridManager.colors[i, j], bucket.transform).Forget();//tmp
+                        /*if(bucket != null && (i + j) % 10 == 0)
+                            SpawnFlyParticle(gridManager.GetPointPosition(i, j), gridManager.colors[i, j], bucket.transform).Forget();//tmp*/
                         gridManager.grid[i, j] = targetValue;
-                        //gridManager.colors[i, j] = gridManager.backgroundColor;
-                        if(j + 1 >= gridManager.rows || (gridManager.colors[i, j + 1].Equals(gridManager.backgroundColor)))
+                        gridManager.colors[i, j] = gridManager.backgroundColor;
+                        /*if(j + 1 >= gridManager.rows || (gridManager.colors[i, j + 1].Equals(gridManager.backgroundColor)))
                             gridManager.colors[i, j] = gridManager.backgroundColor;
                         else
-                            checkList.Add(new Vector2(i, j));
-                        //gridManager.OnDeleteSand();
+                            checkList.Add(new Vector2(i, j));*/
+                        gridManager.OnDeleteSand();
                         gridManager.pressing = true;
                         countSandDeleted++;
                         if (countSandDeleted == maxSandsCanCollect)

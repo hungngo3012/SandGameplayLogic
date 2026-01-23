@@ -158,10 +158,10 @@ public class GridManager : MonoBehaviour
     internal int numBucketsCollectingSand = 0;
     private void Update()
     {
-        if (numBucketsCollectingSand <= 0)
+        /*if (numBucketsCollectingSand <= 0)
             return;
 
-        UpdateSandLogic();
+        UpdateSandLogic();*/
     }
 
     //bool needUpdateTexture = false;
