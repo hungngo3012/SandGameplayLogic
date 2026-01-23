@@ -13,6 +13,7 @@ public class SandManager : MonoBehaviour
     
     [Header("References")]
     public GridManager gridManager; // Kéo GridManager vào đây
+    public List<Shields> shields = new List<Shields>();
 
     private bool isHold;
 
@@ -133,7 +134,6 @@ public class SandManager : MonoBehaviour
     async UniTask SpawnFlyParticle(Vector3 startPos, Color color, Transform target)//tmp
     {
         if (sandParticlePrefab == null) return;
-
         // Tạo hạt cát
         SandPoint p = Instantiate(sandParticlePrefab, startPos, Quaternion.identity);
         p.transform.SetParent(target);
@@ -141,7 +141,6 @@ public class SandManager : MonoBehaviour
     
         // Đổi màu hạt cát cho giống màu vừa xóa (nếu bạn có bảng màu)
         // p.GetComponent<SpriteRenderer>().color = ...; 
-
         float duration = 0.5f; // Thời gian bay (giây)
         float elapsed = 0f;
 
@@ -151,12 +150,43 @@ public class SandManager : MonoBehaviour
     }
     async UniTask WaitToClearSand(List<Vector2> checkList)
     {
+        await UniTask.Yield();
         foreach (var val in checkList)
         {
             await UniTask.Yield();
-            if(gridManager.grid[(int)val.x, (int)val.y] == 0)
-                gridManager.colors[(int)val.x, (int)val.y] = gridManager.backgroundColor;
+            if (gridManager.grid[(int)val.x, (int)val.y] == 0)
+            {
+                //ApplyShield((int)val.x, (int)val.y, gridManager.colors[(int)val.x, (int)val.y]).Forget();
+                gridManager.colors[(int)val.x, (int)val.y] = gridManager.backgroundColor;   
+            }
         }
+    }
+
+    async UniTask ApplyShield(int x, int y, Color color)
+    {
+        Vector3 pos = gridManager.GetPointPosition(x, y);
+        GameObject curShield = null;
+        int waitingFrame = 0;
+        int maxWaitingFrame = 36;
+        foreach (var shield in shields)
+        {
+            if(shield.gameObject.activeSelf)
+                continue;
+            
+            curShield = shield.gameObject;
+            shield.SetColor(color);
+            shield.transform.position = pos;
+            shield.gameObject.SetActive(true);//thêm đổi màu nữa
+            break;
+        }
+        if(curShield == null)
+            return;
+        while (gridManager.grid[x, y] == 0 && waitingFrame <= maxWaitingFrame)
+        {
+            await UniTask.Yield();
+            waitingFrame++;
+        }
+        curShield.gameObject.SetActive(false);
     }
 
     [ContextMenu("Clear All Sands")]
